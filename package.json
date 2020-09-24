@@ -1,0 +1,14 @@
+{
+  "name": "deleg",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Tijn Kersjes <tijn@divbyzero.nl>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^4.0.3"
+  }
+}
