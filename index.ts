@@ -4,8 +4,10 @@ type Quotation = Array<Word>;
 
 type Value = number | Sym | Quotation;
 type Stack = Array<Value>;
+type Dictionary = { [name: string]: Quotation };
 type State = {
   stack: Stack;
+  dictionary: Dictionary;
 };
 
 // primitives
@@ -24,10 +26,33 @@ const drop = (state: State): State => ({
   stack: state.stack.slice(1),
 });
 
+const def = (state: State): State => {
+  const name = state.stack[1];
+  const body = state.stack[0];
+
+  if (typeof name !== "object" || name instanceof Array) {
+    throw new Error(`Expected symbol for definition name: ${name}`);
+  }
+
+  if (!(body instanceof Array)) {
+    throw new Error(`Expected quotation for definition body: ${body}`);
+  }
+
+  return {
+    ...state,
+    stack: state.stack.slice(2),
+    dictionary: {
+      ...state.dictionary,
+      [name.name]: body,
+    },
+  };
+};
+
 const primitives = {
   swap,
   dup,
   drop,
+  def,
 };
 
 // core
@@ -39,6 +64,8 @@ const push = (value: Value, state: State): State => ({
 export function executeWord(state: State, word: Word): State {
   if (typeof word === "number" || typeof word === "object") {
     return push(word, state);
+  } else if (word in state.dictionary) {
+    return execute(state, state.dictionary[word]);
   } else if (word in primitives) {
     return primitives[word](state);
   } else {
@@ -69,7 +96,14 @@ const showStack = (state: State) =>
       .join(" ")}`
   );
 
-const myState: State = { stack: [] };
+const myState: State = { stack: [], dictionary: {} };
 showStack(myState);
-const newState = execute(myState, [42, 5, sym("foo"), [1, "swap"]]);
+const newState = execute(myState, [
+  42,
+  5,
+  sym("one-swap"),
+  [1, "swap"],
+  "def",
+  "one-swap",
+]);
 showStack(newState);
