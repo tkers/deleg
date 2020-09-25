@@ -1,8 +1,8 @@
 type Sym = { name: string };
-type Word = number | string | Sym;
+type Word = number | string | Sym | Quotation;
 type Quotation = Array<Word>;
 
-type Value = number | Sym;
+type Value = number | Sym | Quotation;
 type Stack = Array<Value>;
 type State = {
   stack: Stack;
@@ -54,7 +54,11 @@ export function execute(state: State, words: Quotation): State {
 const sym = (name: string): Sym => ({ name });
 
 const showValue = (value: Value): string =>
-  typeof value === "number" ? `${value}` : `\\${value.name}`;
+  typeof value === "number"
+    ? `${value}`
+    : value instanceof Array
+    ? `{...}`
+    : `\\${value.name}`;
 
 const showStack = (state: State) =>
   console.log(
@@ -67,5 +71,5 @@ const showStack = (state: State) =>
 
 const myState: State = { stack: [] };
 showStack(myState);
-const newState = execute(myState, [42, 5, sym("foo"), "swap", "drop", "dup"]);
+const newState = execute(myState, [42, 5, sym("foo"), [1, "swap"]]);
 showStack(newState);
